@@ -40,7 +40,7 @@ class BootstrapHtmlHelper extends HtmlHelper {
     private function _extractType ($options, $key = 'type', $default = 'info', 
                                       $avail = array('info', 'success', 'warning', 'error')) {
         $type = $this->_extractOption($key, $options, $default) ;
-        if ($type == $default) {
+        if ($default !== false && $type == $default) {
             return null ;
         }
         if (!in_array($type, $avail)) {
@@ -73,13 +73,11 @@ class BootstrapHtmlHelper extends HtmlHelper {
      *
     **/
     public function label ($text, $options = array()) {
-        $type = $this->_extractType($options, 'type', $default = 'default',
-                    array('default', 'success', 'warning', 'info', 'important', 'inverse')) ;
+        $type = $this->_extractType($options, 'type', $default = false,
+                    array('default', 'success', 'warning', 'info', 'danger')) ;
         unset ($options['type']) ;
         $options = $this->addClass($options, 'label') ;
-        if ($type !== 'default') {
-            $options = $this->addClass($options, 'label-'.$type) ;
-        }
+        $options = $this->addClass($options, 'label-'.$type) ;
         return $this->tag('span', $text, $options) ;
     }
     
@@ -95,13 +93,11 @@ class BootstrapHtmlHelper extends HtmlHelper {
      *
     **/
     public function badge ($text, $options = array()) {
-        $type = $this->_extractType($options, 'type', $default = 'default',
-                    array('default', 'success', 'warning', 'info', 'important', 'inverse')) ;
+        $type = $this->_extractType($options, 'type', $default = false,
+                    array('default', 'success', 'warning', 'info', 'danger')) ;
         unset ($options['type']) ;
         $options = $this->addClass($options, 'badge') ;
-        if ($type !== 'default') {
-            $options = $this->addClass($options, 'badge-'.$type) ;
-        }
+        $options = $this->addClass($options, 'badge-'.$type) ;
         return $this->tag('span', $text, $options) ;
     }
 
@@ -116,7 +112,7 @@ class BootstrapHtmlHelper extends HtmlHelper {
      * 	- Separator
     **/
     public function getCrumbList($options = array(), $startText = null) {
-        $options['separator'] = '<span class="divider">/</span>' ;
+        $options['separator'] = '' ;
         $options = $this->addClass($options, 'breadcrumb') ;
         return parent::getCrumbList ($options, $startText) ;
     }
@@ -136,7 +132,7 @@ class BootstrapHtmlHelper extends HtmlHelper {
     **/
     public function alert ($text, $options = array()) {
         $button = '<button class="close" data-dismiss="alert">&times;</button>' ;
-        $type = $this->_extractType($options, 'type', 'warning') ;
+        $type = $this->_extractType($options, 'type', 'warning', array('info', 'success', 'danger')) ;
         unset($options['type']) ;
         $block = $this->_extractOption('block', $options, false) ;
         unset($options['block']) ;
@@ -174,16 +170,16 @@ class BootstrapHtmlHelper extends HtmlHelper {
         $bars = '' ;
         if (is_array($widths)) {
             foreach ($widths as $w) {
-                $class = 'bar' ;
+                $class = 'progress-bar' ;
                 $type = $this->_extractType($w, 'type', 'info', array('info', 'success', 'warning', 'danger')) ;
                 if ($type) {
-                    $class .= ' bar-'.$type ;
+                    $class .= ' progress-bar-'.$type ;
                 }
                 $bars .= $this->div($class, '', array('style' => 'width: '.$w['width'].'%;')) ;
             }
         }
         else {
-            $bars = $this->div('bar', '', array('style' => 'width: '.$widths.'%;')) ;
+            $bars = $this->div('progress-bar', '', array('style' => 'width: '.$widths.'%;')) ;
         }
         $options = $this->addClass($options, 'progress') ;
         if ($active) {

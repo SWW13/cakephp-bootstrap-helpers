@@ -30,6 +30,8 @@ class BootstrapFormHelper extends FormHelper {
     public $inline = false ;
     public $search = false ;
     
+    private $colSize ;
+    
     private $buttonTypes = array('primary', 'info', 'success', 'warning', 'danger', 'inverse', 'link') ;
     private $buttonSizes = array('mini', 'small', 'large') ;
     
@@ -80,6 +82,14 @@ class BootstrapFormHelper extends FormHelper {
      * 
     **/
     public function create($model = null, $options = array()) {
+        $this->colSize = array(
+            'label' => 2,
+            'input' => 10,
+            'error' => 2
+        ) ;
+        if (isset($options['cols'])) {
+            $this->colSize = $options['cols'] ;
+        }
         $this->horizontal = $this->_extractOption('horizontal', $options, false);
 		unset($options['horizontal']);
         $this->search = $this->_extractOption('search', $options, false) ;
@@ -95,13 +105,27 @@ class BootstrapFormHelper extends FormHelper {
         if ($this->search) {
             $options = $this->addClass($options, 'form-search') ;
         }
+        $options['role'] = 'form' ;
         $options['inputDefaults'] = array(
             'div' => $this->inline ? false : array(
-                'class' => 'control-group'
+                'class' => 'form-group'
             )
         ) ;
 		return parent::create($model, $options) ;
 	}
+    
+    /**
+     *
+     * Return the col size class for the specified column (label, input or error).
+     *
+    **/
+    private function getColClass($what) {
+        $size = $this->colSize[$what] ;
+        if ($size) {
+            return 'col-lg-'.$size ;
+        }
+        return '' ;
+    }
     
     /**
      * 
@@ -116,8 +140,8 @@ class BootstrapFormHelper extends FormHelper {
         $optField = $this->_magicOptions(array()) ;
         $options['wrap'] = $this->_extractOption('wrap', $options, 'span') ;
         $errorClass = 'help-block' ;
-        if ($this->horizontal && $optField['type'] != 'checkbox') {
-            $errorClass = 'help-inline' ;
+        if ($this->horizontal && $optField['type'] != 'checkbox' && $optField['type'] != 'radio') {
+            $errorClass = 'help-inline '.$this->getColClass('error') ;
         }
         $options = $this->addClass($options, $errorClass) ;
         return parent::error($field, $text, $options) ;
@@ -131,8 +155,11 @@ class BootstrapFormHelper extends FormHelper {
     public function label($fieldName = null, $text = null, $options = array()) {
         $this->setEntity($fieldName);
         $optField = $this->_magicOptions(array()) ;
-        if ($optField['type'] != 'checkbox') {
+        if ($optField['type'] != 'checkbox' && $optField['type'] != 'radio') {
             $options = $this->addClass($options, 'control-label') ;
+            if ($this->horizontal) {
+                $options = $this->addClass($options, $this->getColClass('label')) ;
+            }
         }
         return parent::label($fieldName, $text, $options) ;
     }
@@ -165,28 +192,22 @@ class BootstrapFormHelper extends FormHelper {
 
         $beforeClass = '' ;
                 
-        if ($options['type'] == 'checkbox') {
-            $before = ($this->horizontal ? '<div class="controls">' : '').'<label class="checkbox">'.$before ;
+        if ($options['type'] == 'checkbox' || $options['type'] == 'radio') {
+            $before = '<label>'.$before ;
             $between = $between.'</label>' ;
             $options['format'] = array('before', 'input', 'label', 'between', 'error', 'after') ;
-            $after = $after.($this->horizontal ? '</div>' : '') ;
-        }
-        else if ($options['type'] == 'radio') {
-            $options['legend'] = false ;
-            $before = $this->label($fieldName)
-                .($this->horizontal ? '<div class="controls">' : '').'<label class="radio">'.$before ;
-            $between = $between.'</label>' ;
-            $options['format'] = array('before', 'input', 'label', 'between', 'error', 'after') ;
-            $after = $after.($this->horizontal ? '</div>' : '') ;
+            $options['div'] = array(
+                'class' => $options['type']
+            );
         }
         else if ($this->horizontal) {
-            $beforeClass .= ' controls' ;
+            $beforeClass .= $this->getColClass('input') ;
         }
         else if ($this->inline && !$this->search && !$label) {
             $options['label'] = false ;
         }
         if ($prepend) {
-            $beforeClass .= ' input-prepend' ;
+            $beforeClass .= ' input-group input-prepend' ;
             if (is_string($prepend)) {
                 $before .= '<span class="add-on">'.$prepend.'</span>' ;
             }
@@ -197,7 +218,7 @@ class BootstrapFormHelper extends FormHelper {
             }
         }
         if ($append) {
-            $beforeClass .= ' input-append' ;
+            $beforeClass .= ' input-group input-append' ;
             if (is_string($append)) {
                 $between = '<span class="add-on">'.$append.'</span>'.$between ;
             }
@@ -216,6 +237,8 @@ class BootstrapFormHelper extends FormHelper {
         $options['before'] = $before ; 
         $options['after'] = $after ;
         $options['between'] = $between ;
+        
+        $options = $this->addClass($options, 'form-control') ;
         
 		return parent::input($fieldName, $options) ;
 	}

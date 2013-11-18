@@ -377,11 +377,11 @@ class BootstrapNavbarHelper extends AppHelper {
             }
             if (!$ul && $nav['pull'] === 'auto') {
                 $ul = 'left' ;
-                $htmls[] = '<ul class="nav">' ;
+                $htmls[] = '<ul class="nav navbar-nav">' ;
             }
             if (!$ul && $nav['pull'] !== 'auto') {
                 $ul = $nav['pull'] ;
-                $htmls[] = '<ul class="nav pull-'.$nav['pull'].'">' ;
+                $htmls[] = '<ul class="nav navbar-nav pull-'.$nav['pull'].'">' ;
             }
             $res = $this->compileNavBlock($nav) ;
             $options = array('class' => $res['class']) ;
@@ -413,7 +413,7 @@ class BootstrapNavbarHelper extends AppHelper {
         $inner = '' ;
         
         $brand = $this->brand !== null ? 
-            $this->Html->link($this->brand['text'], $this->brand['url'], array('class' => 'brand')) : null ;
+            $this->Html->link($this->brand['text'], $this->brand['url'], array('class' => 'navbar-brand')) : null ;
         $inner = implode('', $htmls) ;
         
         if ($this->responsive) {
